@@ -29,29 +29,10 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Create .env file
-        run: |
-          if [ -n "${{ secrets.ENV_FILE_CONTENTS }}" ]; then
-            echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
-          else
-            echo "FOO=foo" > .env
-            echo "BAR=bar" >> .env
-          fi
-
-      - name: Decode keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $RUNNER_TEMP/release.keystore
-
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build release APK
-        env:
-          KEYSTORE_FILE: ${{ secrets.KEYSTORE_BASE64 != '' && format('{0}/release.keystore', runner.temp) || '' }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: flutter build apk --release
 
       - name: Upload APK artifact
